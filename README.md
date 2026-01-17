@@ -191,17 +191,57 @@ logging:
 
 ## 策略回测
 
-项目提供简单回测工具用于评估告警策略的有效性:
+项目提供完整的回测工具链，支持获取真实历史数据并评估策略有效性。
+
+### 获取真实历史数据
+
+使用 `fetch_historical_data.py` 从交易所下载历史K线数据:
 
 ```bash
-# 运行回测（使用模拟数据）
-python scripts/backtest_simple.py --days 30
+# 获取Binance的BTC/USDT 30天数据
+python scripts/fetch_historical_data.py \
+  --symbol BTC/USDT \
+  --days 30
 
-# 自定义参数
-python scripts/backtest_simple.py \
+# 使用其他交易所 (推荐使用OKX或Bybit避免限流)
+python scripts/fetch_historical_data.py \
+  --exchange okx \
+  --symbol BTC/USDT \
   --days 30 \
+  --output data/okx_btc_30d.json
+
+# 查看帮助
+python scripts/fetch_historical_data.py --help
+```
+
+**数据文件格式**:
+```json
+[
+  {
+    "timestamp": 1736812800,
+    "open": 102500.0,
+    "high": 102800.0,
+    "low": 102200.0,
+    "close": 102650.0,
+    "volume": 1250.5
+  },
+  ...
+]
+```
+
+### 运行回测
+
+使用 `backtest_simple.py` 进行策略回测:
+
+```bash
+# 使用真实数据回测
+python scripts/backtest_simple.py \
+  --data data/binance_BTC_USDT_30d.json \
   --ma-period 30 \
   --volume-threshold 3.0
+
+# 使用模拟数据快速测试
+python scripts/backtest_simple.py --days 30
 
 # 查看帮助
 python scripts/backtest_simple.py --help
@@ -229,9 +269,25 @@ python scripts/backtest_simple.py --help
 ```
 
 **注意事项**:
-- 当前版本使用模拟数据，真实回测需要使用历史K线数据
+- 推荐使用真实历史数据进行回测以获得准确评估
+- 某些交易所可能有API限流，推荐使用OKX或Bybit
 - 回测结果不代表未来表现，仅供参考
 - 建议先通过纸上交易验证策略有效性
+
+**完整回测工作流**:
+```bash
+# 1. 获取30天真实数据
+python scripts/fetch_historical_data.py --exchange okx --symbol BTC/USDT --days 30
+
+# 2. 运行回测
+python scripts/backtest_simple.py --data data/okx_BTC_USDT_30d.json
+
+# 3. 分析结果，调整参数后重新测试
+python scripts/backtest_simple.py \
+  --data data/okx_BTC_USDT_30d.json \
+  --ma-period 20 \
+  --volume-threshold 2.5
+```
 
 ## 项目结构
 

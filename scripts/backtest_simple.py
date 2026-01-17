@@ -10,8 +10,10 @@ Usage:
 import argparse
 import sys
 import os
+import json
 from datetime import datetime, timedelta
 from collections import defaultdict
+from pathlib import Path
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -54,6 +56,40 @@ class BacktestResult:
         })
 
 
+def load_data_from_file(filepath: str) -> list[OHLCV]:
+    """Load OHLCV data from JSON file.
+
+    Args:
+        filepath: Path to JSON file with OHLCV data
+
+    Returns:
+        List of OHLCV bars
+    """
+    print(f"\n📂 加载历史数据文件: {filepath}")
+
+    if not Path(filepath).exists():
+        print(f"❌ 错误: 文件不存在")
+        sys.exit(1)
+
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+
+    bars = []
+    for item in data:
+        bar = OHLCV(
+            timestamp=item['timestamp'],
+            open=item['open'],
+            high=item['high'],
+            low=item['low'],
+            close=item['close'],
+            volume=item['volume']
+        )
+        bars.append(bar)
+
+    print(f"✅ 成功加载 {len(bars)} 根K线数据\n")
+    return bars
+
+
 def generate_sample_data(days: int = 30) -> list[OHLCV]:
     """Generate sample OHLCV data for backtesting.
 
@@ -67,6 +103,7 @@ def generate_sample_data(days: int = 30) -> list[OHLCV]:
     """
     print(f"\n⚠️  注意: 使用模拟数据进行回测")
     print(f"   真实回测请使用历史K线数据")
+    print(f"   获取真实数据: python scripts/fetch_historical_data.py --symbol BTC/USDT --days {days}")
     print()
 
     bars = []
@@ -284,6 +321,11 @@ def main():
         default=3.0,
         help='Volume threshold multiplier (default: 3.0)'
     )
+    parser.add_argument(
+        '--data',
+        type=str,
+        help='Path to JSON file with historical data (if not provided, uses simulated data)'
+    )
 
     args = parser.parse_args()
 
@@ -291,10 +333,17 @@ def main():
     print("🔬 Signal 策略回测")
     print("=" * 70)
     print(f"\n交易对: {args.symbol}")
-    print(f"回测周期: {args.days} 天")
 
-    # Generate sample data
-    bars = generate_sample_data(days=args.days)
+    # Load data from file or generate sample data
+    if args.data:
+        bars = load_data_from_file(args.data)
+        # Calculate actual days from data
+        if bars:
+            time_span = (bars[-1].timestamp - bars[0].timestamp) / (24 * 3600)
+            print(f"回测周期: {time_span:.1f} 天 (真实数据)")
+    else:
+        print(f"回测周期: {args.days} 天 (模拟数据)")
+        bars = generate_sample_data(days=args.days)
 
     # Run backtest
     result = run_backtest(
