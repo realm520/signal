@@ -3,14 +3,15 @@
     "name": "Signal",
     "version": "0.1.0",
     "description": "加密货币行情监控告警系统",
-    "status": "completed",
+    "status": "iterating",
     "acceptance_document": "ACCEPTANCE_CRITERIA.md"
   },
   "ralph_loop": {
     "task": "开始项目实现，确保满足ACCEPTANCE_CRITERIA.md，否则不要结束",
-    "status": "completed",
-    "completion_date": "2026-01-18",
-    "completion_time": "01:50:00 +08"
+    "status": "iterating",
+    "current_iteration": 20,
+    "completion_promise": null,
+    "last_update": "2026-01-18 01:54:00 +08"
   },
   "acceptance_criteria": {
     "total": 57,
@@ -89,6 +90,18 @@
     "documentation": "completed"
   },
   "key_commits": [
+    {
+      "hash": "a9cabe8",
+      "message": "重构: 改善项目文件组织结构",
+      "impact": "moderate",
+      "description": "将验收文档移至claudedocs/,脚本移至scripts/,保持根目录整洁"
+    },
+    {
+      "hash": "dca7f09",
+      "message": "Complete Signal v0.1.0",
+      "impact": "high",
+      "description": "所有验收标准满足,创建Ralph Loop跟踪文件"
+    },
     {
       "hash": "d2e5222",
       "message": "修复指标计算切片逻辑错误",
