@@ -77,9 +77,23 @@
       "description": "Production-ready deployment configurations for Docker and Systemd"
     },
     "operations": {
+      "status": "enhanced",
+      "files": [
+        "scripts/health_check.py",
+        "scripts/alert_stats.py",
+        "scripts/prometheus_exporter.py"
+      ],
+      "description": "Health monitoring, alert analytics, and Prometheus integration"
+    },
+    "monitoring": {
       "status": "added",
-      "files": ["scripts/health_check.py"],
-      "description": "Health monitoring and operational tooling"
+      "files": [
+        "scripts/prometheus.yml",
+        "scripts/signal_alerts.yml",
+        "scripts/grafana-dashboard.json",
+        "scripts/signal-exporter.service"
+      ],
+      "description": "Complete Prometheus/Grafana observability stack"
     },
     "verification_documents": {
       "status": "completed",

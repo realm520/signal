@@ -84,6 +84,17 @@ Recent Improvements (Iteration 20):
    - 健康检查脚本
    - 完整运维文档(日志/监控/热更新)
 
+4. 告警统计和Prometheus监控 (Commit 12b83bd)
+   - alert_stats.py: 日志分析和统计
+   - prometheus_exporter.py: 指标暴露
+   - 时间分布热力图
+
+5. Prometheus/Grafana完整集成 (Commit 2aa5cd8)
+   - Prometheus配置和告警规则
+   - Grafana dashboard (4个panel)
+   - signal-exporter独立服务
+   - 企业级可观测性栈
+
 All functional requirements implemented and tested.
 All UAT tests passed.
 All deliverables submitted.
