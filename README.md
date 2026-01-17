@@ -510,12 +510,42 @@ docker-compose restart signal
 
 MIT License
 
+## 文档
+
+### 项目文档
+- 📖 [README.md](README.md) - 本文件，快速开始指南
+- ✅ [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) - 完整功能规格和验收标准
+- 📝 [CHANGELOG.md](CHANGELOG.md) - 版本历史和变更记录
+- 🔒 [SECURITY.md](SECURITY.md) - 安全最佳实践
+- 🤝 [CONTRIBUTING.md](CONTRIBUTING.md) - 贡献指南
+
+### 外部文档
+- [CCXT Pro 文档](https://docs.ccxt.com/#/ccxt.pro.manual) - WebSocket API 参考
+- [飞书机器人文档](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN) - Webhook 集成
+
+### 验收文档
+详细的测试报告和验收文档位于 [claudedocs/](claudedocs/) 目录。
+
 ## 支持
 
-遇到问题？请查看：
-1. [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) - 完整功能规格
-2. [CCXT Pro 文档](https://docs.ccxt.com/#/ccxt.pro.manual)
-3. [飞书机器人文档](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN)
+遇到问题？
+
+1. 查看 [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) 了解功能详情
+2. 阅读 [SECURITY.md](SECURITY.md) 了解安全配置
+3. 参考 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何贡献
+4. 搜索或创建 GitHub Issue
+
+## 贡献
+
+欢迎贡献! 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解:
+- 开发环境设置
+- 代码规范和测试要求
+- 提交 Pull Request 流程
+- Bug 报告和功能请求
+
+## 许可证
+
+MIT License
 
 ---
 
