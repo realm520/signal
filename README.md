@@ -293,9 +293,43 @@ uv run ruff check src/
 uv run ruff format src/
 ```
 
-## Docker 部署
+## 生产部署
 
-### 使用 Docker Compose (推荐)
+### 方式一: Systemd 服务 (Linux 推荐)
+
+适用于 Linux 服务器,使用 systemd 管理进程:
+
+```bash
+# 1. 自动部署 (推荐)
+sudo ./scripts/deploy_systemd.sh
+
+# 2. 编辑配置
+sudo nano /opt/signal/config.yaml
+
+# 3. 重启服务
+sudo systemctl restart signal
+
+# 4. 查看日志
+sudo journalctl -u signal -f
+```
+
+**服务管理命令**:
+```bash
+sudo systemctl start signal      # 启动
+sudo systemctl stop signal       # 停止
+sudo systemctl restart signal    # 重启
+sudo systemctl status signal     # 状态
+```
+
+**健康检查**:
+```bash
+# 运行健康检查脚本
+python scripts/health_check.py
+```
+
+### 方式二: Docker 部署
+
+#### 使用 Docker Compose (推荐)
 
 1. **构建镜像**
 ```bash
@@ -323,20 +357,75 @@ docker-compose logs -f signal
 docker-compose down
 ```
 
-### 使用 Docker (不使用 Compose)
+### 方式三: 手动运行 (开发/测试)
 
 ```bash
-# 构建镜像
-docker build -t signal:latest .
+# 直接运行
+uv run signal
 
-# 运行容器
-docker run -d \
-  --name signal-monitor \
-  --restart unless-stopped \
-  -v $(pwd)/config.yaml:/app/config.yaml:ro \
-  -v $(pwd)/logs:/app/logs \
-  -e LARK_WEBHOOK_URL="your_webhook_url" \
-  signal:latest
+# 或使用 Python 模块
+uv run python -m signal_app
+```
+
+## 运维管理
+
+### 日志管理
+
+**Systemd 部署**:
+```bash
+# 查看实时日志
+sudo journalctl -u signal -f
+
+# 查看最近100条
+sudo journalctl -u signal -n 100
+
+# 查看今天的日志
+sudo journalctl -u signal --since today
+```
+
+**Docker 部署**:
+```bash
+# 查看实时日志
+docker-compose logs -f signal
+
+# 查看最近100条
+docker-compose logs --tail=100 signal
+```
+
+**文件日志** (所有部署方式):
+```bash
+# 日志位置
+tail -f logs/signal.log
+
+# 按日期归档 (可添加到cron)
+gzip logs/signal.log.$(date +%Y%m%d)
+```
+
+### 性能监控
+
+```bash
+# 系统资源监控 (systemd)
+systemctl status signal
+
+# Docker资源监控
+docker stats signal-monitor
+
+# 健康检查
+python scripts/health_check.py
+```
+
+### 配置热更新
+
+修改配置后重启服务:
+
+```bash
+# Systemd
+sudo systemctl restart signal
+
+# Docker Compose
+docker-compose restart signal
+
+# 手动运行 (Ctrl+C 然后重新运行)
 ```
 
 ## 许可证
