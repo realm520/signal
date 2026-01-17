@@ -50,6 +50,20 @@ uv sync
 
 ### 配置
 
+#### 方式一: 使用交互式向导 (推荐新手)
+
+```bash
+python scripts/setup_wizard.py
+```
+
+向导会引导你完成:
+- ✅ 选择交易所和交易对
+- ✅ 配置技术指标参数
+- ✅ 设置飞书 Webhook
+- ✅ 自动生成 config.yaml
+
+#### 方式二: 手动配置
+
 1. **创建配置文件**
 ```bash
 cp config.example.yaml config.yaml
