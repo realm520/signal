@@ -99,6 +99,21 @@ alerts:
   lark_webhook: "${LARK_WEBHOOK_URL}"
 ```
 
+### 运行前检查 (可选但推荐)
+
+```bash
+# 运行系统诊断
+python scripts/diagnose.py
+```
+
+诊断工具会检查:
+- ✅ Python和uv版本
+- ✅ 配置文件完整性
+- ✅ 依赖包安装状态
+- ✅ 网络连接
+- ✅ Webhook配置
+- ✅ 测试通过情况
+
 ### 运行
 
 ```bash
