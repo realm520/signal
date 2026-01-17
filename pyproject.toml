@@ -1,0 +1,22 @@
+[project]
+name = "signal"
+version = "0.1.0"
+description = "Real-time cryptocurrency market monitoring and alert system"
+requires-python = ">=3.10"
+dependencies = [
+    "ccxt>=4.0.0",
+    "pandas>=2.0.0",
+    "httpx>=0.25.0",
+    "pyyaml>=6.0",
+    "structlog>=23.0.0",
+]
+
+[project.scripts]
+signal = "signal.__main__:main"
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

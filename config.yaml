@@ -1,0 +1,30 @@
+# Signal - Cryptocurrency Market Monitoring Configuration
+# Production configuration for testing
+
+# Exchanges to monitor
+exchanges:
+  # Binance
+  - name: binance
+    markets:
+      - BTC/USDT
+      - ETH/USDT
+    enabled: true
+
+# Technical indicator settings
+indicators:
+  ma_period: 30           # Moving average period (30 * 15m = 7.5 hours)
+  ma_type: SMA            # Simple Moving Average
+  volume_threshold: 3.0   # 3x volume surge
+  lookback_bars: 4        # 1 hour lookback (4 * 15m)
+
+# Alert settings
+alerts:
+  # Lark webhook URL (provided by user)
+  lark_webhook: "https://open.larksuite.com/open-apis/bot/v2/hook/78a3abef-5c4c-4faa-8342-a537a0820d12"
+  cooldown_seconds: 300   # 5 minutes cooldown
+  rate_limit: 10          # Max 10 alerts per minute
+
+# Logging configuration
+logging:
+  level: INFO             # INFO level for production
+  file: logs/signal.log   # Log to file

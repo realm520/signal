@@ -1,0 +1,49 @@
+# Signal - Cryptocurrency Market Monitoring Configuration
+# Copy this file to config.yaml and customize for your needs
+
+# Exchanges to monitor
+exchanges:
+  # Binance
+  - name: binance
+    markets:
+      - BTC/USDT
+      - ETH/USDT
+    enabled: true
+
+  # OKX (disabled by default)
+  - name: okx
+    markets:
+      - BTC/USDT
+      - ETH/USDT
+    enabled: false
+
+  # Bybit (disabled by default)
+  - name: bybit
+    markets:
+      - BTC/USDT
+    enabled: false
+
+# Technical indicator settings
+indicators:
+  ma_period: 30           # Moving average period (number of 15m bars)
+  ma_type: SMA            # MA type: SMA (Simple) or EMA (Exponential)
+  volume_threshold: 3.0   # Volume surge threshold (e.g., 3.0 = 3x average)
+  lookback_bars: 4        # Number of bars for new high/low detection (4 = 1 hour)
+
+# Alert settings
+alerts:
+  # Lark webhook URL
+  # Option 1: Direct URL (less secure)
+  lark_webhook: "https://open.larksuite.com/open-apis/bot/v2/hook/YOUR_WEBHOOK_ID"
+
+  # Option 2: Environment variable (recommended)
+  # lark_webhook: "${LARK_WEBHOOK_URL}"
+  # Then set: export LARK_WEBHOOK_URL="https://open.larksuite.com/..."
+
+  cooldown_seconds: 300   # Cooldown period after alert (5 minutes)
+  rate_limit: 10          # Maximum alerts per minute
+
+# Logging configuration
+logging:
+  level: INFO             # Logging level: DEBUG, INFO, WARNING, ERROR
+  file: logs/signal.log   # Log file path
