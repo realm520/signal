@@ -2,8 +2,10 @@
 
 import asyncio
 import httpx
+import pytest
 
 
+@pytest.mark.asyncio
 async def test_webhook():
     """Send test message to Lark webhook."""
     webhook_url = "https://open.larksuite.com/open-apis/bot/v2/hook/78a3abef-5c4c-4faa-8342-a537a0820d12"
