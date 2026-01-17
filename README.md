@@ -287,6 +287,24 @@ uv sync --all-extras
 uv run pytest
 ```
 
+### 配置验证
+```bash
+# 验证配置文件
+python scripts/validate_config.py
+
+# 验证指定文件
+python scripts/validate_config.py --config /path/to/config.yaml
+```
+
+### 性能基准测试
+```bash
+# 默认测试 (10,000 bars)
+python scripts/benchmark.py
+
+# 自定义参数
+python scripts/benchmark.py --bars 100000 --iterations 20
+```
+
 ### 代码格式化
 ```bash
 uv run ruff check src/
