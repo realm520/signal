@@ -96,8 +96,9 @@ class IndicatorEngine:
         bars_list = list(self.bars)
         current_volume = bars_list[-1].volume
 
-        # Calculate average volume of previous bars (excluding current)
-        prev_volumes = [bar.volume for bar in bars_list[-(self.lookback_bars + 1):-1]]
+        # Calculate average volume of previous 3 bars (前3根K线平均值)
+        # ACCEPTANCE_CRITERIA.md: avg_volume_1h = sum(volume[-4:-1]) / 3
+        prev_volumes = [bar.volume for bar in bars_list[-self.lookback_bars:-1]]
         avg_volume = sum(prev_volumes) / len(prev_volumes)
 
         if avg_volume == 0:
@@ -120,8 +121,9 @@ class IndicatorEngine:
         bars_list = list(self.bars)
         current_close = bars_list[-1].close
 
-        # Get previous bars' highest price (excluding current)
-        prev_highs = [bar.high for bar in bars_list[-(self.lookback_bars + 1):-1]]
+        # Get previous 3 bars' highest price (前3根K线最高价)
+        # ACCEPTANCE_CRITERIA.md: high_1h = max(high[-4:-1])
+        prev_highs = [bar.high for bar in bars_list[-self.lookback_bars:-1]]
         prev_high = max(prev_highs)
 
         is_new_high = current_close > prev_high
@@ -140,8 +142,9 @@ class IndicatorEngine:
         bars_list = list(self.bars)
         current_close = bars_list[-1].close
 
-        # Get previous bars' lowest price (excluding current)
-        prev_lows = [bar.low for bar in bars_list[-(self.lookback_bars + 1):-1]]
+        # Get previous 3 bars' lowest price (前3根K线最低价)
+        # ACCEPTANCE_CRITERIA.md: low_1h = min(low[-4:-1])
+        prev_lows = [bar.low for bar in bars_list[-self.lookback_bars:-1]]
         prev_low = min(prev_lows)
 
         is_new_low = current_close < prev_low
