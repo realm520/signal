@@ -4,17 +4,19 @@ import asyncio
 import sys
 import os
 import time
+import pytest
 
 # Add src to path and avoid stdlib signal conflict
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 # Import after path setup
 import signal as _
-from signal.indicators import IndicatorEngine, OHLCV
-from signal.alerts import AlertManager
-from signal.config import Config
+from signal_app.indicators import IndicatorEngine, OHLCV
+from signal_app.alerts import AlertManager
+from signal_app.config import Config
 
 
+@pytest.mark.asyncio
 async def test_complete_alert_flow():
     """Test complete flow: indicators -> alert check -> notification."""
     print("🧪 Signal 系统集成测试")
