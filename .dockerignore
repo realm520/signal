@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Configuration (users should mount their own)
+config.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+claudedocs/
+README.md
+ACCEPTANCE_CRITERIA.md
+
+# Ralph Loop
+.claude/
+prd.json
+progress.txt
+.ralph_loop_complete
+
+# Scripts and tests
+scripts/
+tests/
+test_*.py

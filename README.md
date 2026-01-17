@@ -293,6 +293,52 @@ uv run ruff check src/
 uv run ruff format src/
 ```
 
+## Docker 部署
+
+### 使用 Docker Compose (推荐)
+
+1. **构建镜像**
+```bash
+docker-compose build
+```
+
+2. **准备配置文件**
+```bash
+cp config.example.yaml config.yaml
+# 编辑 config.yaml 设置 Webhook URL 和监控市场
+```
+
+3. **启动服务**
+```bash
+docker-compose up -d
+```
+
+4. **查看日志**
+```bash
+docker-compose logs -f signal
+```
+
+5. **停止服务**
+```bash
+docker-compose down
+```
+
+### 使用 Docker (不使用 Compose)
+
+```bash
+# 构建镜像
+docker build -t signal:latest .
+
+# 运行容器
+docker run -d \
+  --name signal-monitor \
+  --restart unless-stopped \
+  -v $(pwd)/config.yaml:/app/config.yaml:ro \
+  -v $(pwd)/logs:/app/logs \
+  -e LARK_WEBHOOK_URL="your_webhook_url" \
+  signal:latest
+```
+
 ## 许可证
 
 MIT License
