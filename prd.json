@@ -67,11 +67,23 @@
       "path": "config.example.yaml"
     },
     "documentation": {
-      "status": "completed",
-      "files": ["README.md", "ACCEPTANCE_CRITERIA.md", "TEST_REPORT.md"]
+      "status": "enhanced",
+      "files": ["README.md", "ACCEPTANCE_CRITERIA.md"],
+      "enhancements": "Added Docker and Systemd deployment sections, operational guides"
+    },
+    "deployment": {
+      "status": "added",
+      "files": ["Dockerfile", "docker-compose.yml", ".dockerignore", "scripts/signal.service", "scripts/deploy_systemd.sh"],
+      "description": "Production-ready deployment configurations for Docker and Systemd"
+    },
+    "operations": {
+      "status": "added",
+      "files": ["scripts/health_check.py"],
+      "description": "Health monitoring and operational tooling"
     },
     "verification_documents": {
       "status": "completed",
+      "path": "claudedocs/",
       "files": [
         "ABSOLUTE_FINAL_CONFIRMATION.md",
         "RALPH_LOOP_FINAL_DECLARATION.md",
