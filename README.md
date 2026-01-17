@@ -403,6 +403,7 @@ gzip logs/signal.log.$(date +%Y%m%d)
 
 ### 性能监控
 
+**基础监控**:
 ```bash
 # 系统资源监控 (systemd)
 systemctl status signal
@@ -413,6 +414,35 @@ docker stats signal-monitor
 # 健康检查
 python scripts/health_check.py
 ```
+
+**告警统计分析**:
+```bash
+# 分析最近7天的告警
+python scripts/alert_stats.py
+
+# 分析最近30天
+python scripts/alert_stats.py --days 30
+
+# 指定日志文件
+python scripts/alert_stats.py --log /path/to/signal.log
+```
+
+**Prometheus 监控集成**:
+```bash
+# 启动 Prometheus exporter (默认端口9090)
+python scripts/prometheus_exporter.py
+
+# 自定义端口
+python scripts/prometheus_exporter.py --port 8080
+
+# 访问指标
+curl http://localhost:9090/metrics
+```
+
+暴露的指标:
+- `signal_alerts_total{type="bullish|bearish"}` - 24小时内告警总数
+- `signal_health_status{component="log|config"}` - 组件健康状态
+- `signal_log_age_seconds` - 日志文件最后更新时间
 
 ### 配置热更新
 
