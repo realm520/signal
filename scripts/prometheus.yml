@@ -1,0 +1,31 @@
+# Prometheus configuration for Signal monitoring
+# Place this in your Prometheus config directory (usually /etc/prometheus/)
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Signal metrics exporter
+  - job_name: 'signal'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'signal'
+          environment: 'production'
+
+    # Optional: scrape over TLS
+    # scheme: https
+    # tls_config:
+    #   ca_file: /path/to/ca.pem
+    #   cert_file: /path/to/cert.pem
+    #   key_file: /path/to/key.pem
+
+    # Optional: basic authentication
+    # basic_auth:
+    #   username: 'prometheus'
+    #   password: 'your_password'
+
+# Alerting rules (optional)
+rule_files:
+  - 'signal_alerts.yml'

@@ -427,22 +427,52 @@ python scripts/alert_stats.py --days 30
 python scripts/alert_stats.py --log /path/to/signal.log
 ```
 
-**Prometheus 监控集成**:
+**Prometheus + Grafana 完整监控栈**:
+
+1. **启动 Signal Prometheus Exporter**:
 ```bash
-# 启动 Prometheus exporter (默认端口9090)
-python scripts/prometheus_exporter.py
+# 方式1: 直接运行
+python scripts/prometheus_exporter.py --port 9090
 
-# 自定义端口
-python scripts/prometheus_exporter.py --port 8080
+# 方式2: Systemd服务
+sudo cp scripts/signal-exporter.service /etc/systemd/system/
+sudo systemctl enable signal-exporter
+sudo systemctl start signal-exporter
 
-# 访问指标
-curl http://localhost:9090/metrics
+# 方式3: Docker
+docker run -d --name signal-exporter \
+  -p 9090:9090 \
+  -v $(pwd)/logs:/app/logs:ro \
+  signal:latest python scripts/prometheus_exporter.py
 ```
 
-暴露的指标:
+2. **配置 Prometheus**:
+```bash
+# 添加Signal job到Prometheus配置
+# 参考: scripts/prometheus.yml
+
+# 添加告警规则
+# 参考: scripts/signal_alerts.yml
+```
+
+3. **导入 Grafana Dashboard**:
+```bash
+# 导入预配置的dashboard
+# 文件: scripts/grafana-dashboard.json
+# Grafana UI: Dashboards → Import → Upload JSON file
+```
+
+**暴露的指标**:
 - `signal_alerts_total{type="bullish|bearish"}` - 24小时内告警总数
-- `signal_health_status{component="log|config"}` - 组件健康状态
-- `signal_log_age_seconds` - 日志文件最后更新时间
+- `signal_health_status{component="log|config"}` - 组件健康状态 (1=健康, 0=异常)
+- `signal_log_age_seconds` - 日志文件最后更新距今秒数
+
+**预配置的告警规则**:
+- `SignalLogStale` - 日志5分钟未更新
+- `SignalLogUnhealthy` - 日志组件异常
+- `SignalConfigMissing` - 配置文件缺失
+- `SignalNoAlertsLongTime` - 24小时无告警(可能市场平静或检测失败)
+- `SignalHighAlertRate` - 告警频率异常高(可能误报)
 
 ### 配置热更新
 

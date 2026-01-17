@@ -1,0 +1,63 @@
+# Prometheus alerting rules for Signal monitoring system
+
+groups:
+  - name: signal_health
+    interval: 30s
+    rules:
+      # Alert if log file is stale (not updated in 5 minutes)
+      - alert: SignalLogStale
+        expr: signal_log_age_seconds > 300
+        for: 2m
+        labels:
+          severity: warning
+          service: signal
+        annotations:
+          summary: "Signal log file is stale"
+          description: "Log file hasn't been updated in {{ $value }}s. Signal may not be running."
+
+      # Alert if log component is unhealthy
+      - alert: SignalLogUnhealthy
+        expr: signal_health_status{component="log"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: signal
+        annotations:
+          summary: "Signal log component unhealthy"
+          description: "Log file check failed. Signal may have stopped or crashed."
+
+      # Alert if config is missing
+      - alert: SignalConfigMissing
+        expr: signal_health_status{component="config"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: signal
+        annotations:
+          summary: "Signal configuration missing"
+          description: "config.yaml not found. Signal cannot start without configuration."
+
+  - name: signal_alerts
+    interval: 30s
+    rules:
+      # Alert if no alerts have been sent in 24 hours (might indicate a problem)
+      - alert: SignalNoAlertsLongTime
+        expr: sum(signal_alerts_total) == 0
+        for: 24h
+        labels:
+          severity: info
+          service: signal
+        annotations:
+          summary: "No alerts sent in 24 hours"
+          description: "Signal hasn't sent any alerts in 24h. Market may be quiet or detection may be failing."
+
+      # Alert if alert rate is unusually high (possible false positives)
+      - alert: SignalHighAlertRate
+        expr: rate(signal_alerts_total[5m]) > 2
+        for: 10m
+        labels:
+          severity: warning
+          service: signal
+        annotations:
+          summary: "High alert rate detected"
+          description: "Alert rate is {{ $value | humanize }} alerts/sec. May indicate false positive issues or extreme market volatility."
