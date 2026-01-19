@@ -30,6 +30,13 @@ indicators:
   volume_threshold: 3.0   # Volume surge threshold (e.g., 3.0 = 3x average)
   lookback_bars: 4        # Number of bars for new high/low detection (4 = 1 hour)
 
+  # 价格突破幅度要求（百分比）
+  # 0.5 = 要求价格突破0.5%以上才告警（默认值）
+  # 1.0 = 要求价格突破1%以上
+  # 2.0 = 要求价格突破2%以上
+  # 建议范围: 0.1 - 5.0
+  breakout_threshold_pct: 0.5
+
 # Alert settings
 alerts:
   # Lark webhook URL
@@ -39,6 +46,18 @@ alerts:
   # Option 2: Environment variable (recommended)
   # lark_webhook: "${LARK_WEBHOOK_URL}"
   # Then set: export LARK_WEBHOOK_URL="https://open.larksuite.com/..."
+
+  # Mention user in alerts (optional, 两种方式)
+  #
+  # 方式 1: 简单文本显示（推荐，无需 open_id）
+  # mention_user_id: "ZhangHarry"  # 在消息中显示 @ZhangHarry（无通知）
+  #
+  # 方式 2: 真正的 @ 通知（需要获取 open_id）
+  # mention_user_id: "ou_xxxxxx"  # 使用 open_id 实现真正的 @ 通知
+  # 获取 open_id: 运行 scripts/extract_user_id_from_webhook.py
+  #
+  # Or use environment variable:
+  # mention_user_id: "${LARK_MENTION_USER_ID}"
 
   cooldown_seconds: 300   # Cooldown period after alert (5 minutes)
   rate_limit: 10          # Maximum alerts per minute

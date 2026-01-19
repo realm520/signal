@@ -23,7 +23,8 @@ class AlertManager:
         self,
         lark_webhook: str,
         cooldown_seconds: int = 300,
-        rate_limit: int = 10
+        rate_limit: int = 10,
+        mention_user_id: Optional[str] = None
     ):
         """Initialize alert manager.
 
@@ -31,10 +32,12 @@ class AlertManager:
             lark_webhook: Lark webhook URL
             cooldown_seconds: Cooldown period in seconds
             rate_limit: Maximum messages per minute
+            mention_user_id: Lark user open_id to mention (optional)
         """
         self.lark_webhook = lark_webhook
         self.cooldown_seconds = cooldown_seconds
         self.rate_limit = rate_limit
+        self.mention_user_id = mention_user_id
 
         # Track last alert time for each market
         self._last_alert_time: Dict[str, float] = {}
@@ -64,23 +67,45 @@ class AlertManager:
         volume_surge: bool,
         volume_multiplier: float,
         is_new_high: bool,
-        is_new_low: bool
+        is_new_low: bool,
+        # 新增可选参数
+        is_breakout_high: Optional[bool] = None,
+        is_breakout_low: Optional[bool] = None,
+        breakout_pct_high: Optional[float] = None,
+        breakout_pct_low: Optional[float] = None
     ) -> Optional[str]:
-        """Check if alert conditions are met.
+        """检查告警条件是否满足。
+
+        新增参数:
+            is_breakout_high: 是否满足看涨突破幅度（可选）
+            is_breakout_low: 是否满足看跌突破幅度（可选）
+            breakout_pct_high: 实际看涨突破幅度（可选，用于日志）
+            breakout_pct_low: 实际看跌突破幅度（可选，用于日志）
 
         Returns:
-            Alert type (bullish/bearish) or None if no alert
+            Alert type (bullish/bearish) or None
         """
-        # Condition 1: Volume surge must be present
+        # 条件1：成交量放大（必需）
         if not volume_surge:
             return None
 
-        # Condition 2a: Bullish signal (price > MA30 AND new high)
-        if current_price > ma_value and is_new_high:
+        # 条件2a：看涨信号
+        # 优先使用增强型检测（如果提供）
+        use_enhanced_bullish = is_breakout_high is not None
+        bullish_condition = (
+            is_breakout_high if use_enhanced_bullish else is_new_high
+        )
+
+        if current_price > ma_value and bullish_condition:
             return AlertType.BULLISH
 
-        # Condition 2b: Bearish signal (price < MA30 AND new low)
-        if current_price < ma_value and is_new_low:
+        # 条件2b：看跌信号
+        use_enhanced_bearish = is_breakout_low is not None
+        bearish_condition = (
+            is_breakout_low if use_enhanced_bearish else is_new_low
+        )
+
+        if current_price < ma_value and bearish_condition:
             return AlertType.BEARISH
 
         return None
@@ -125,7 +150,9 @@ class AlertManager:
         volume_multiplier: float,
         current_volume: float,
         reference_price: float,
-        price_change_pct: float
+        price_change_pct: float,
+        # 新增参数（可选）
+        breakout_pct: Optional[float] = None
     ) -> dict:
         """Format message for Lark webhook.
 
@@ -139,6 +166,7 @@ class AlertManager:
             current_volume: Current volume
             reference_price: Reference high/low price
             price_change_pct: Price change percentage
+            breakout_pct: 突破幅度百分比（可选）
 
         Returns:
             Lark message payload
@@ -146,26 +174,41 @@ class AlertManager:
         # Determine emoji and signal name
         if alert_type == AlertType.BULLISH:
             emoji = "🚀"
-            signal = "看涨信号"
+            signal = "向上插针"
             direction = "↑"
             position = "上方"
         else:
             emoji = "📉"
-            signal = "看跌信号"
+            signal = "向下插针"
             direction = "↓"
             position = "下方"
 
         # Format timestamp
         timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
-        # Build message content
-        content = f"""{emoji} **{signal}** | {exchange.capitalize()}
+        # 新增：突破幅度显示
+        breakout_info = ""
+        if breakout_pct is not None:
+            breakout_info = f"\n- 突破幅度: {abs(breakout_pct):.2f}%"
+
+        # Build message content with @ mention if configured
+        mention_prefix = ""
+        if self.mention_user_id:
+            # 检查是否是简单的用户名（不是 open_id）
+            if self.mention_user_id.startswith('ou_'):
+                # 使用 open_id 实现真正的 @ 通知
+                mention_prefix = f"<at user_id=\"{self.mention_user_id}\"></at> "
+            else:
+                # 使用用户名，只是文本显示（无通知）
+                mention_prefix = f"@{self.mention_user_id} "
+
+        content = f"""{mention_prefix}{emoji} **{signal}** | {exchange.capitalize()}
 📊 **{market}**: ${current_price:,.2f} {direction} {price_change_pct:+.2f}%
 
 📈 **指标**:
 - 成交量: {volume_multiplier:.1f}x 1H均值 ({current_volume:,.2f})
 - MA30: ${ma_value:,.2f} ({position})
-- 1H参考价: ${reference_price:,.2f}
+- 1H参考价: ${reference_price:,.2f}{breakout_info}
 
 ⏰ {timestamp}"""
 
@@ -188,7 +231,9 @@ class AlertManager:
         ma_value: float,
         volume_multiplier: float,
         current_volume: float,
-        reference_price: float
+        reference_price: float,
+        # 新增参数（可选）
+        breakout_pct: Optional[float] = None
     ) -> bool:
         """Send alert to Lark webhook.
 
@@ -201,6 +246,7 @@ class AlertManager:
             volume_multiplier: Volume surge multiplier
             current_volume: Current volume
             reference_price: Reference high/low price
+            breakout_pct: 突破幅度百分比（可选）
 
         Returns:
             True if message sent successfully
@@ -240,7 +286,9 @@ class AlertManager:
             volume_multiplier=volume_multiplier,
             current_volume=current_volume,
             reference_price=reference_price,
-            price_change_pct=price_change_pct
+            price_change_pct=price_change_pct,
+            # 新增参数（可选）
+            breakout_pct=breakout_pct
         )
 
         # Send to Lark
