@@ -30,16 +30,44 @@
 
 ## 快速开始
 
-### 前置要求
+### 方式一：直接运行（无需克隆仓库）⚡
+
+使用 `uvx` 直接从 GitHub 运行，无需克隆代码：
+
+```bash
+# 1. 安装 uv（如果还没有）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. 准备配置文件
+wget https://raw.githubusercontent.com/realm520/signal/main/config.example.yaml -O config.yaml
+# 编辑 config.yaml，填入飞书 Webhook 和监控市场
+
+# 3. 直接运行
+uvx git+https://github.com/realm520/signal.git
+
+# 或使用环境变量指定配置路径
+SIGNAL_CONFIG=/path/to/config.yaml uvx git+https://github.com/realm520/signal.git
+```
+
+**优势**：
+- ✅ 零配置，一键运行
+- ✅ 自动隔离环境，不污染系统
+- ✅ 始终使用最新代码
+- ✅ 适合快速体验和测试
+
+### 方式二：本地安装（推荐开发）
+
+#### 前置要求
 
 - Python 3.10+
 - [uv](https://github.com/astral-sh/uv) 包管理器
 - 飞书机器人 Webhook URL
 
-### 安装
+#### 安装
 
 1. **克隆或下载项目**
 ```bash
+git clone https://github.com/realm520/signal.git
 cd signal
 ```
 
@@ -48,9 +76,9 @@ cd signal
 uv sync
 ```
 
-### 配置
+#### 配置
 
-#### 方式一: 使用交互式向导 (推荐新手)
+**使用交互式向导（推荐新手）**
 
 ```bash
 python scripts/setup_wizard.py
@@ -62,7 +90,7 @@ python scripts/setup_wizard.py
 - ✅ 设置飞书 Webhook
 - ✅ 自动生成 config.yaml
 
-#### 方式二: 手动配置
+**或手动配置**
 
 1. **创建配置文件**
 ```bash
@@ -99,7 +127,7 @@ alerts:
   lark_webhook: "${LARK_WEBHOOK_URL}"
 ```
 
-### 运行前检查 (可选但推荐)
+#### 运行前检查（可选但推荐）
 
 ```bash
 # 运行系统诊断
@@ -114,7 +142,7 @@ python scripts/diagnose.py
 - ✅ Webhook配置
 - ✅ 测试通过情况
 
-### 运行
+#### 运行
 
 ```bash
 uv run signal
@@ -643,34 +671,26 @@ MIT License
 
 ### 项目文档
 - 📖 [README.md](README.md) - 本文件，快速开始指南
-- ✅ [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) - 完整功能规格和验收标准
-- 📝 [CHANGELOG.md](CHANGELOG.md) - 版本历史和变更记录
-- 🔒 [SECURITY.md](SECURITY.md) - 安全最佳实践
-- 🤝 [CONTRIBUTING.md](CONTRIBUTING.md) - 贡献指南
+- 🤖 [CLAUDE.md](CLAUDE.md) - Claude Code 集成指南
 
 ### 外部文档
 - [CCXT Pro 文档](https://docs.ccxt.com/#/ccxt.pro.manual) - WebSocket API 参考
 - [飞书机器人文档](https://open.feishu.cn/document/ukTMukTMukTM/ucTM5YjL3ETO24yNxkjN) - Webhook 集成
 
-### 验收文档
-详细的测试报告和验收文档位于 [claudedocs/](claudedocs/) 目录。
-
 ## 支持
 
 遇到问题？
 
-1. 查看 [ACCEPTANCE_CRITERIA.md](ACCEPTANCE_CRITERIA.md) 了解功能详情
-2. 阅读 [SECURITY.md](SECURITY.md) 了解安全配置
-3. 参考 [CONTRIBUTING.md](CONTRIBUTING.md) 了解如何贡献
-4. 搜索或创建 GitHub Issue
+1. 查看 [CLAUDE.md](CLAUDE.md) 了解完整的架构和配置说明
+2. 运行 `python scripts/diagnose.py` 进行系统诊断
+3. 搜索或创建 [GitHub Issue](https://github.com/realm520/signal/issues)
 
 ## 贡献
 
-欢迎贡献! 请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解:
-- 开发环境设置
-- 代码规范和测试要求
-- 提交 Pull Request 流程
-- Bug 报告和功能请求
+欢迎贡献！提交 Pull Request 前请确保：
+- ✅ 代码通过 `uv run ruff check` 检查
+- ✅ 测试通过 `uv run pytest`
+- ✅ 遵循现有代码风格和架构模式
 
 ## 许可证
 
