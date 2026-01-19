@@ -30,6 +30,11 @@ indicators:
   volume_threshold: 3.0   # Volume surge threshold (e.g., 3.0 = 3x average)
   lookback_bars: 4        # Number of bars for new high/low detection (4 = 1 hour)
 
+  # 启动时加载的历史K线数量
+  # 100 = 加载最近100根15分钟K线（约25小时数据）
+  # 建议范围: 50 - 200（至少要大于 ma_period）
+  historical_bars: 100
+
   # 价格突破幅度要求（百分比）
   # 0.5 = 要求价格突破0.5%以上才告警（默认值）
   # 1.0 = 要求价格突破1%以上

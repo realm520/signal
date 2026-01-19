@@ -19,7 +19,8 @@ class ExchangeMonitor:
         markets: list[str],
         timeframe: str = "15m",
         max_retries: int = 5,
-        retry_delay: int = 5
+        retry_delay: int = 5,
+        historical_bars: int = 100
     ):
         """Initialize exchange monitor.
 
@@ -29,12 +30,14 @@ class ExchangeMonitor:
             timeframe: Timeframe for OHLCV data
             max_retries: Maximum reconnection attempts
             retry_delay: Delay between retries in seconds
+            historical_bars: Number of historical bars to fetch on startup
         """
         self.exchange_name = exchange_name
         self.markets = markets
         self.timeframe = timeframe
         self.max_retries = max_retries
         self.retry_delay = retry_delay
+        self.historical_bars = historical_bars
 
         # Initialize exchange
         exchange_class = getattr(ccxtpro, exchange_name)
@@ -57,12 +60,79 @@ class ExchangeMonitor:
         """
         self._callback = callback
 
+    async def _fetch_historical_data(self, market: str) -> None:
+        """Fetch historical OHLCV data for a market.
+
+        Args:
+            market: Market symbol
+        """
+        try:
+            logger.info(
+                "fetching_historical_data",
+                exchange=self.exchange_name,
+                market=market,
+                bars=self.historical_bars
+            )
+
+            # Fetch historical data using ccxt.pro's fetch_ohlcv
+            ohlcvs = await self.exchange.fetch_ohlcv(
+                market,
+                timeframe=self.timeframe,
+                limit=self.historical_bars
+            )
+
+            if not ohlcvs:
+                logger.warning(
+                    "no_historical_data",
+                    exchange=self.exchange_name,
+                    market=market
+                )
+                return
+
+            logger.info(
+                "historical_data_fetched",
+                exchange=self.exchange_name,
+                market=market,
+                bars=len(ohlcvs)
+            )
+
+            # Send historical data through callback
+            if self._callback:
+                for ohlcv_data in ohlcvs:
+                    # Convert to OHLCV dataclass
+                    ohlcv = OHLCV(
+                        timestamp=ohlcv_data[0],
+                        open=float(ohlcv_data[1]),
+                        high=float(ohlcv_data[2]),
+                        low=float(ohlcv_data[3]),
+                        close=float(ohlcv_data[4]),
+                        volume=float(ohlcv_data[5])
+                    )
+
+                    # Call callback with historical data
+                    await self._callback(
+                        self.exchange_name,
+                        market,
+                        ohlcv
+                    )
+
+        except Exception as e:
+            logger.error(
+                "historical_data_fetch_failed",
+                exchange=self.exchange_name,
+                market=market,
+                error=str(e)
+            )
+
     async def _watch_ohlcv(self, market: str) -> None:
         """Watch OHLCV data for a market.
 
         Args:
             market: Market symbol
         """
+        # Fetch historical data first (only once)
+        await self._fetch_historical_data(market)
+
         retries = 0
 
         while self._running and retries < self.max_retries:
