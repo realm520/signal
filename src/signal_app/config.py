@@ -139,6 +139,15 @@ class Config:
         return float(self._config['indicators'].get('breakout_threshold_pct', 0.5))
 
     @property
+    def historical_bars(self) -> int:
+        """获取启动时加载的历史K线数量。
+
+        Returns:
+            历史K线数量，默认 100
+        """
+        return int(self._config['indicators'].get('historical_bars', 100))
+
+    @property
     def lark_webhook(self) -> str:
         """Get Lark webhook URL."""
         return self._config['alerts']['lark_webhook']

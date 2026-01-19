@@ -197,7 +197,8 @@ class SignalApp:
             monitor = ExchangeMonitor(
                 exchange_name=exchange_name,
                 markets=markets,
-                timeframe="15m"
+                timeframe="15m",
+                historical_bars=self.config.historical_bars
             )
 
             # Set callback
