@@ -317,7 +317,7 @@ class TestAlertManager:
         )
 
         assert payload["msg_type"] == "text"
-        assert "看涨信号" in payload["content"]["text"]
+        assert "向上插针" in payload["content"]["text"]
         assert "Binance" in payload["content"]["text"]
         assert "BTC/USDT" in payload["content"]["text"]
         assert "45,230.50" in payload["content"]["text"]
@@ -342,10 +342,73 @@ class TestAlertManager:
         )
 
         assert payload["msg_type"] == "text"
-        assert "看跌信号" in payload["content"]["text"]
+        assert "向下插针" in payload["content"]["text"]
         assert "ETH/USDT" in payload["content"]["text"]
         assert "2,180.30" in payload["content"]["text"]
         assert "4.2x" in payload["content"]["text"]
+
+    def test_format_lark_message_with_mention(self):
+        """Test Lark message formatting with user mention."""
+        manager = AlertManager(
+            lark_webhook="https://example.com/webhook",
+            mention_user_id="ou_test123"
+        )
+
+        payload = manager._format_lark_message(
+            alert_type=AlertType.BULLISH,
+            exchange="binance",
+            market="BTC/USDT",
+            current_price=45230.50,
+            ma_value=44100.00,
+            volume_multiplier=3.5,
+            current_volume=1250.00,
+            reference_price=44200.00,
+            price_change_pct=2.34
+        )
+
+        assert payload["msg_type"] == "text"
+        # Verify @ mention is included
+        assert '<at user_id="ou_test123"></at>' in payload["content"]["text"]
+        assert "向上插针" in payload["content"]["text"]
+
+    def test_initialization_with_mention_user_id(self):
+        """Test alert manager initialization with mention_user_id."""
+        manager = AlertManager(
+            lark_webhook="https://example.com/webhook",
+            cooldown_seconds=300,
+            rate_limit=10,
+            mention_user_id="ou_test123"
+        )
+        assert manager.lark_webhook == "https://example.com/webhook"
+        assert manager.cooldown_seconds == 300
+        assert manager.rate_limit == 10
+        assert manager.mention_user_id == "ou_test123"
+
+    def test_format_lark_message_with_simple_username(self):
+        """Test Lark message formatting with simple username (text display only)."""
+        manager = AlertManager(
+            lark_webhook="https://example.com/webhook",
+            mention_user_id="ZhangHarry"  # 简单用户名，非 open_id
+        )
+
+        payload = manager._format_lark_message(
+            alert_type=AlertType.BULLISH,
+            exchange="binance",
+            market="BTC/USDT",
+            current_price=45230.50,
+            ma_value=44100.00,
+            volume_multiplier=3.5,
+            current_volume=1250.00,
+            reference_price=44200.00,
+            price_change_pct=2.34
+        )
+
+        assert payload["msg_type"] == "text"
+        # 验证简单文本 @ 格式
+        assert '@ZhangHarry ' in payload["content"]["text"]
+        # 不应该包含 <at> 标签
+        assert '<at user_id=' not in payload["content"]["text"]
+        assert "向上插针" in payload["content"]["text"]
 
 
 if __name__ == "__main__":
