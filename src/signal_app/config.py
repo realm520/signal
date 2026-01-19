@@ -130,6 +130,15 @@ class Config:
         return int(self._config['indicators']['lookback_bars'])
 
     @property
+    def breakout_threshold_pct(self) -> float:
+        """获取突破幅度阈值百分比。
+
+        Returns:
+            突破幅度阈值，默认 0.5%
+        """
+        return float(self._config['indicators'].get('breakout_threshold_pct', 0.5))
+
+    @property
     def lark_webhook(self) -> str:
         """Get Lark webhook URL."""
         return self._config['alerts']['lark_webhook']
@@ -143,6 +152,15 @@ class Config:
     def rate_limit(self) -> int:
         """Get rate limit (messages per minute)."""
         return int(self._config['alerts'].get('rate_limit', 10))
+
+    @property
+    def mention_user_id(self) -> str | None:
+        """Get Lark user ID to mention in alerts (optional).
+
+        Returns:
+            User open_id or None if not configured
+        """
+        return self._config['alerts'].get('mention_user_id')
 
     @property
     def log_level(self) -> str:

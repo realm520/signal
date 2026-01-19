@@ -89,8 +89,19 @@ class SignalApp:
         # Calculate indicators
         ma_value = engine.calculate_ma()
         volume_surge, volume_multiplier = engine.check_volume_surge()
-        is_new_high, prev_high = engine.check_new_high()
-        is_new_low, prev_low = engine.check_new_low()
+
+        # 获取突破幅度阈值
+        breakout_threshold = self.config.breakout_threshold_pct
+
+        # 使用增强型检测
+        is_breakout_high, prev_high, breakout_pct_high = \
+            engine.check_new_high_with_threshold(breakout_threshold)
+        is_breakout_low, prev_low, breakout_pct_low = \
+            engine.check_new_low_with_threshold(breakout_threshold)
+
+        # 仍然计算原有的 is_new_high/is_new_low（用于日志对比和调试）
+        is_new_high, _ = engine.check_new_high()
+        is_new_low, _ = engine.check_new_low()
 
         current_price = engine.current_price
         current_volume = engine.current_volume
@@ -103,7 +114,12 @@ class SignalApp:
             volume_surge=volume_surge,
             volume_mult=volume_multiplier,
             new_high=is_new_high,
-            new_low=is_new_low
+            new_low=is_new_low,
+            # 新增日志字段
+            breakout_high=is_breakout_high,
+            breakout_low=is_breakout_low,
+            breakout_pct_high=breakout_pct_high,
+            breakout_pct_low=breakout_pct_low
         )
 
         # Check alert conditions
@@ -118,12 +134,22 @@ class SignalApp:
             volume_surge=volume_surge,
             volume_multiplier=volume_multiplier or 0,
             is_new_high=is_new_high,
-            is_new_low=is_new_low
+            is_new_low=is_new_low,
+            # 新增参数
+            is_breakout_high=is_breakout_high,
+            is_breakout_low=is_breakout_low,
+            breakout_pct_high=breakout_pct_high,
+            breakout_pct_low=breakout_pct_low
         )
 
         if alert_type:
-            # Determine reference price
-            reference_price = prev_high if alert_type == "bullish" else prev_low
+            # 确定参考价格和突破幅度
+            if alert_type == "bullish":
+                reference_price = prev_high
+                breakout_pct = breakout_pct_high
+            else:
+                reference_price = prev_low
+                breakout_pct = breakout_pct_low
 
             # Send alert
             await self.alert_manager.send_alert(
@@ -134,7 +160,9 @@ class SignalApp:
                 ma_value=ma_value,
                 volume_multiplier=volume_multiplier or 0,
                 current_volume=current_volume,
-                reference_price=reference_price or current_price
+                reference_price=reference_price or current_price,
+                # 新增参数（可选）
+                breakout_pct=breakout_pct
             )
 
     async def start(self) -> None:
@@ -156,7 +184,8 @@ class SignalApp:
         self.alert_manager = AlertManager(
             lark_webhook=self.config.lark_webhook,
             cooldown_seconds=self.config.cooldown_seconds,
-            rate_limit=self.config.rate_limit
+            rate_limit=self.config.rate_limit,
+            mention_user_id=self.config.mention_user_id
         )
         await self.alert_manager.__aenter__()
 
