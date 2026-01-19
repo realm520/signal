@@ -70,4 +70,5 @@ alerts:
 # Logging configuration
 logging:
   level: INFO             # Logging level: DEBUG, INFO, WARNING, ERROR
-  file: logs/signal.log   # Log file path
+  to_file: true           # Whether to log to file (set to false for PM2/Docker)
+  file: logs/signal.log   # Log file path (only used when to_file is true)

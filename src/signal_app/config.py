@@ -177,6 +177,21 @@ class Config:
         return self._config['logging']['level']
 
     @property
-    def log_file(self) -> str:
-        """Get log file path."""
-        return self._config['logging']['file']
+    def log_to_file(self) -> bool:
+        """Get whether to log to file.
+
+        Returns:
+            True if logging to file is enabled, False otherwise (default: True)
+        """
+        return self._config['logging'].get('to_file', True)
+
+    @property
+    def log_file(self) -> str | None:
+        """Get log file path.
+
+        Returns:
+            Log file path if log_to_file is True, None otherwise
+        """
+        if not self.log_to_file:
+            return None
+        return self._config['logging'].get('file', 'logs/signal.log')
