@@ -48,10 +48,19 @@ class IndicatorEngine:
     def add_bar(self, bar: OHLCV) -> None:
         """Add new OHLCV bar to history.
 
+        If the bar has the same timestamp as the last bar, update it.
+        Otherwise, append as a new bar.
+
         Args:
             bar: OHLCV data
         """
-        self.bars.append(bar)
+        # Check if this is an update to the last bar (same timestamp)
+        if self.bars and self.bars[-1].timestamp == bar.timestamp:
+            # Update the last bar
+            self.bars[-1] = bar
+        else:
+            # New bar with different timestamp
+            self.bars.append(bar)
 
     def has_sufficient_data(self) -> bool:
         """Check if we have enough data for calculations.
@@ -150,6 +159,81 @@ class IndicatorEngine:
         is_new_low = current_close < prev_low
 
         return is_new_low, prev_low
+
+    def check_new_high_with_threshold(
+        self,
+        threshold_pct: float = 0.0
+    ) -> tuple[bool, Optional[float], Optional[float]]:
+        """检查当前价格是否创新高且突破幅度达到阈值。
+
+        Args:
+            threshold_pct: 突破幅度阈值（百分比），例如 0.5 表示 0.5%
+
+        Returns:
+            Tuple of (is_breakout, prev_high, breakout_pct)
+            - is_breakout: 是否同时满足新高和幅度要求
+            - prev_high: 前3根K线最高价
+            - breakout_pct: 实际突破幅度百分比
+        """
+        if len(self.bars) < self.lookback_bars:
+            return False, None, None
+
+        bars_list = list(self.bars)
+        current_close = bars_list[-1].close
+
+        # 获取前3根K线最高价
+        prev_highs = [bar.high for bar in bars_list[-self.lookback_bars:-1]]
+        prev_high = max(prev_highs)
+
+        # 计算突破幅度百分比
+        if prev_high == 0:
+            return False, prev_high, None
+
+        breakout_pct = ((current_close - prev_high) / prev_high) * 100
+
+        # 判断是否同时满足：创新高 AND 突破幅度达标
+        is_new_high = current_close > prev_high
+        is_breakout = is_new_high and (breakout_pct >= threshold_pct)
+
+        return is_breakout, prev_high, breakout_pct
+
+    def check_new_low_with_threshold(
+        self,
+        threshold_pct: float = 0.0
+    ) -> tuple[bool, Optional[float], Optional[float]]:
+        """检查当前价格是否创新低且突破幅度达到阈值。
+
+        Args:
+            threshold_pct: 突破幅度阈值（百分比），例如 0.5 表示 0.5%
+
+        Returns:
+            Tuple of (is_breakout, prev_low, breakout_pct)
+            - is_breakout: 是否同时满足新低和幅度要求
+            - prev_low: 前3根K线最低价
+            - breakout_pct: 实际突破幅度百分比（负值）
+        """
+        if len(self.bars) < self.lookback_bars:
+            return False, None, None
+
+        bars_list = list(self.bars)
+        current_close = bars_list[-1].close
+
+        # 获取前3根K线最低价
+        prev_lows = [bar.low for bar in bars_list[-self.lookback_bars:-1]]
+        prev_low = min(prev_lows)
+
+        # 计算突破幅度百分比（看跌为负值）
+        if prev_low == 0:
+            return False, prev_low, None
+
+        breakout_pct = ((current_close - prev_low) / prev_low) * 100
+
+        # 判断是否同时满足：创新低 AND 突破幅度达标
+        # 注意：看跌时 breakout_pct 为负值，threshold_pct 为正值
+        is_new_low = current_close < prev_low
+        is_breakout = is_new_low and (abs(breakout_pct) >= threshold_pct)
+
+        return is_breakout, prev_low, breakout_pct
 
     @property
     def current_price(self) -> Optional[float]:
