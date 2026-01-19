@@ -151,7 +151,7 @@ class SignalApp:
                 reference_price = prev_low
                 breakout_pct = breakout_pct_low
 
-            # Send alert
+            # Send alert (with bar timestamp for startup protection)
             await self.alert_manager.send_alert(
                 alert_type=alert_type,
                 exchange=exchange,
@@ -162,7 +162,8 @@ class SignalApp:
                 current_volume=current_volume,
                 reference_price=reference_price or current_price,
                 # 新增参数（可选）
-                breakout_pct=breakout_pct
+                breakout_pct=breakout_pct,
+                bar_timestamp_ms=ohlcv.timestamp
             )
 
     async def start(self) -> None:
@@ -210,6 +211,14 @@ class SignalApp:
             self.monitors.append(monitor)
 
         logger.info("app_started", monitor_count=len(self.monitors))
+
+        # Send startup notification
+        exchanges_list = [ex['name'] for ex in self.config.exchanges]
+        total_markets = sum(len(ex['markets']) for ex in self.config.exchanges)
+        await self.alert_manager.send_startup_notification(
+            exchanges=exchanges_list,
+            markets_count=total_markets
+        )
 
     async def stop(self) -> None:
         """Stop the application."""

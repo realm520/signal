@@ -220,6 +220,10 @@ class TestAlertManager:
 
         manager._http_client = mock_client
 
+        import time
+        # Use a timestamp after startup
+        future_timestamp = int(time.time() * 1000) + 10000
+
         # Send alert
         success = await manager.send_alert(
             alert_type=AlertType.BULLISH,
@@ -229,12 +233,45 @@ class TestAlertManager:
             ma_value=44000.0,
             volume_multiplier=3.5,
             current_volume=1250.0,
-            reference_price=44500.0
+            reference_price=44500.0,
+            bar_timestamp_ms=future_timestamp
         )
 
         assert success is True
         assert "binance:BTC/USDT" in manager._last_alert_time
         assert len(manager._recent_alerts) == 1
+
+    @pytest.mark.asyncio
+    async def test_send_alert_historical_skip(self):
+        """Test alert skipped for historical data (startup protection)."""
+        manager = AlertManager(
+            lark_webhook="https://example.com/webhook",
+            cooldown_seconds=10
+        )
+
+        mock_client = AsyncMock()
+        manager._http_client = mock_client
+
+        import time
+        # Use a timestamp before startup
+        historical_timestamp = int(time.time() * 1000) - 10000
+
+        # Should skip due to startup protection
+        success = await manager.send_alert(
+            alert_type=AlertType.BULLISH,
+            exchange="binance",
+            market="BTC/USDT",
+            current_price=45000.0,
+            ma_value=44000.0,
+            volume_multiplier=3.5,
+            current_volume=1250.0,
+            reference_price=44500.0,
+            bar_timestamp_ms=historical_timestamp
+        )
+
+        assert success is False
+        # HTTP client should not be called
+        mock_client.post.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_send_alert_cooldown_skip(self):

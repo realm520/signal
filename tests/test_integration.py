@@ -135,7 +135,8 @@ async def test_complete_alert_flow():
                 ma_value=ma_value,
                 volume_multiplier=vol_mult or 0,
                 current_volume=engine.current_volume,
-                reference_price=prev_high or engine.current_price
+                reference_price=prev_high or engine.current_price,
+                bar_timestamp_ms=int(time.time() * 1000)  # 使用当前时间戳（毫秒）
             )
 
             if success:

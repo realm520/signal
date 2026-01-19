@@ -140,7 +140,8 @@ async def test_uat_02_validation():
                         ma_value=ma_value,
                         volume_multiplier=vol_mult or 0,
                         current_volume=engine.current_volume,
-                        reference_price=prev_high or prev_low or engine.current_price
+                        reference_price=prev_high or prev_low or engine.current_price,
+                        bar_timestamp_ms=int(time.time() * 1000)  # 使用当前时间戳（毫秒）
                     )
                     if success:
                         print(f"   ✅ 告警发送成功！\n")
